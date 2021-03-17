@@ -1,0 +1,48 @@
+from os import path
+import pygame
+from classes import colors
+
+
+class TextMoney:
+    def __init__(self, locator, text):
+        size = int(1 * locator.block_size[0])
+        position = (locator.shift_horizontal + int(8.75 * locator.block_size[0]),
+                    locator.shift_vertical + int(1.75 * locator.block_size[1]))
+        self.text = text
+        self.color = colors.YELLOW
+        self.size = size
+        self.position = position
+        font_dir = path.join(path.dirname(__file__), '..')
+        font_dir = path.join(font_dir, 'res')
+        self.font = path.join(font_dir, "Adigiana_2.ttf")
+        self.sized_font = pygame.font.Font(self.font, self.size)
+        self.render = self.sized_font.render(self.text, True, self.color)
+        self.rect = self.render.get_rect()
+        self.discharges_list = ["", "K", "M", "B", "T", "aa",
+                                "ab", "ac", "ad", "ae", "af",
+                                "ag", "ah", "ai", "aj", "ak",
+                                "al", "am", "an", "ao", "ap",
+                                "aq", "ar", "as", "at", "au",
+                                "av", "aw", "ax", "ay", "az"]
+
+        self.is_activated = False
+
+    def draw(self, surface):
+        self.render = self.sized_font.render(self.text, True, self.color)
+        self.rect = self.render.get_rect()
+        self.rect.center = self.position
+        surface.blit(self.render, self.rect)
+
+    def update(self, text):
+        # Разложение на разряды
+        decomposition = "0"
+        i = 1000
+        discharge_decomposition = dict()
+        for discharge in self.discharges_list:
+            discharge_decomposition[discharge] = (int(text) % i) // (i // 1000)
+            i *= 1000
+        # Запись в виде максимального разряда
+        for discharge in reversed(self.discharges_list):
+            if discharge_decomposition[discharge] != 0 and decomposition == "0":
+                decomposition = str(discharge_decomposition[discharge]) + discharge
+        self.text = decomposition
